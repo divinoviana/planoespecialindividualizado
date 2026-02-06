@@ -1,0 +1,5 @@
+{
+  "name": "EducaIA - Gerador de PEI Automatizado",
+  "description": "Uma plataforma inteligente para criação de Planos de Ensino Individualizados (PEI) integrando a BNCC e o Documento Território Tocantins (DCT), com armazenamento seguro via Supabase e inteligência artificial Gemini.",
+  "requestFramePermissions": []
+}
