@@ -2,7 +2,9 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PEIContent } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// @ts-ignore
+const apiKey = process.env.API_KEY;
+const ai = new GoogleGenAI({ apiKey: apiKey });
 
 export const generatePEIContent = async (formData: {
   studentName: string;
