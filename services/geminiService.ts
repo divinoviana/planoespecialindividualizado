@@ -2,8 +2,8 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PEIContent } from "../types";
 
-// @ts-ignore
-const apiKey = process.env.API_KEY;
+// A variável API_KEY é injetada pelo Vite via define no config
+const apiKey = process.env.API_KEY || "";
 const ai = new GoogleGenAI({ apiKey: apiKey });
 
 export const generatePEIContent = async (formData: {
@@ -58,8 +58,8 @@ export const generatePEIContent = async (formData: {
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          historicoClinico: { type: Type.STRING, description: '1⁰ - Breve histórico clínico e familiar do estudante (Baseado no laudo se disponível)' },
-          condicaoEspecifica: { type: Type.STRING, description: '2⁰ - Breve descrição da condição específica do estudante (Diagnóstico e implicações)' },
+          historicoClinico: { type: Type.STRING, description: '1⁰ - Breve histórico clínico e familiar do estudante' },
+          condicaoEspecifica: { type: Type.STRING, description: '2⁰ - Breve descrição da condição específica do estudante' },
           habilidadesAfinidades: { type: Type.STRING, description: '3⁰ - Conhecimentos, habilidades e afinidades do estudante' },
           barreiras: { type: Type.STRING, description: '4⁰ - Principais barreiras a serem superadas pelo estudante' },
           habilidadesBNCC: { type: Type.STRING, description: '5⁰ - Habilidades da turma (BNCC/DCT)' },
