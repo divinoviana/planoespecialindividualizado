@@ -2,9 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { PEIContent } from "../types";
 
-// A variável API_KEY é injetada pelo Vite via define no config
-const apiKey = process.env.API_KEY || "";
-const ai = new GoogleGenAI({ apiKey: apiKey });
+// A chave é injetada pelo Vite durante o build/runtime via process.env.API_KEY
+const getAIClient = () => {
+  const apiKey = (process.env as any).API_KEY || "";
+  return new GoogleGenAI({ apiKey });
+};
 
 export const generatePEIContent = async (formData: {
   studentName: string;
@@ -18,6 +20,8 @@ export const generatePEIContent = async (formData: {
   extraContext?: string;
   pdfBase64?: string;
 }): Promise<PEIContent> => {
+  const ai = getAIClient();
+  
   const textPrompt = `
     Você é um especialista em Educação Especial e Inclusiva no Brasil, com profundo conhecimento da BNCC (Base Nacional Comum Curricular) e do DCT (Documento Curricular do Território do Tocantins).
     
@@ -58,17 +62,17 @@ export const generatePEIContent = async (formData: {
       responseSchema: {
         type: Type.OBJECT,
         properties: {
-          historicoClinico: { type: Type.STRING, description: '1⁰ - Breve histórico clínico e familiar do estudante' },
-          condicaoEspecifica: { type: Type.STRING, description: '2⁰ - Breve descrição da condição específica do estudante' },
-          habilidadesAfinidades: { type: Type.STRING, description: '3⁰ - Conhecimentos, habilidades e afinidades do estudante' },
-          barreiras: { type: Type.STRING, description: '4⁰ - Principais barreiras a serem superadas pelo estudante' },
-          habilidadesBNCC: { type: Type.STRING, description: '5⁰ - Habilidades da turma (BNCC/DCT)' },
-          habilidadesAdaptadas: { type: Type.STRING, description: '6⁰ - Habilidades da turma (Adaptação e Flexibilização)' },
-          objetoConhecimentoBNCC: { type: Type.STRING, description: '7⁰ - Objeto do Conhecimento (BNCC/DCT)' },
-          objetoConhecimentoAdaptado: { type: Type.STRING, description: '8⁰ - Objeto do Conhecimento (Adaptação e Flexibilização)' },
-          objetivosPEI: { type: Type.STRING, description: '9⁰ - Objetivos do PEI para o estudante' },
-          metodologias: { type: Type.STRING, description: '10⁰ - Metodologias (Recursos e Estratégias utilizadas)' },
-          avaliacao: { type: Type.STRING, description: '11⁰ - Avaliação (ponto de partida, avanços e retomadas)' },
+          historicoClinico: { type: Type.STRING },
+          condicaoEspecifica: { type: Type.STRING },
+          habilidadesAfinidades: { type: Type.STRING },
+          barreiras: { type: Type.STRING },
+          habilidadesBNCC: { type: Type.STRING },
+          habilidadesAdaptadas: { type: Type.STRING },
+          objetoConhecimentoBNCC: { type: Type.STRING },
+          objetoConhecimentoAdaptado: { type: Type.STRING },
+          objetivosPEI: { type: Type.STRING },
+          metodologias: { type: Type.STRING },
+          avaliacao: { type: Type.STRING },
         },
         required: [
           'historicoClinico', 'condicaoEspecifica', 'habilidadesAfinidades', 'barreiras',
@@ -79,5 +83,6 @@ export const generatePEIContent = async (formData: {
     }
   });
 
-  return JSON.parse(response.text.trim()) as PEIContent;
+  const text = response.text || "{}";
+  return JSON.parse(text.trim()) as PEIContent;
 };
