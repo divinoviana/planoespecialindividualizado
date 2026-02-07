@@ -139,7 +139,9 @@ const PEIForm: React.FC<PEIFormProps> = ({ onGenerated }) => {
           </div>
 
           <div className="mt-6">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">Observações Adicionais (Contexto do Aluno)</label>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              Observações Adicionais (Contexto do Aluno) <span className="text-slate-400 font-normal">- Opcional</span>
+            </label>
             <textarea
               name="extraContext"
               value={formData.extraContext}
