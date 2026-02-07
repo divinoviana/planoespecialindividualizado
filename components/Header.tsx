@@ -1,49 +1,35 @@
 
 import React from 'react';
-import { BookOpen, Plus, ClipboardList } from 'lucide-react';
+import { BookOpen, RefreshCw } from 'lucide-react';
 
 interface HeaderProps {
-  onNavigate: (view: 'LIST' | 'FORM') => void;
-  currentView: string;
+  onNew?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigate, currentView }) => {
+const Header: React.FC<HeaderProps> = ({ onNew }) => {
   return (
-    <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+    <header className="bg-white border-b border-slate-200 sticky top-0 z-50 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-2 cursor-pointer" onClick={() => onNavigate('LIST')}>
+          <div className="flex items-center gap-2">
             <div className="bg-indigo-600 p-2 rounded-lg">
               <BookOpen className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-violet-600">
-              EducaIA PEI
+              Crie seu PEI de forma simples
             </h1>
           </div>
           
           <nav className="flex gap-4">
-            <button
-              onClick={() => onNavigate('LIST')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
-                currentView === 'LIST' 
-                  ? 'bg-indigo-50 text-indigo-700' 
-                  : 'text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <ClipboardList className="w-4 h-4" />
-              <span className="hidden sm:inline">Meus Planos</span>
-            </button>
-            <button
-              onClick={() => onNavigate('FORM')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all shadow-sm ${
-                currentView === 'FORM'
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-indigo-500 text-white hover:bg-indigo-600'
-              }`}
-            >
-              <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Novo PEI</span>
-            </button>
+            {onNew && (
+              <button
+                onClick={onNew}
+                className="flex items-center gap-2 px-4 py-2 rounded-md bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors font-medium"
+              >
+                <RefreshCw className="w-4 h-4" />
+                <span>Criar Novo PEI</span>
+              </button>
+            )}
           </nav>
         </div>
       </div>

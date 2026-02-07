@@ -1,15 +1,14 @@
 
 import React, { useState, useRef } from 'react';
-import { Sparkles, Loader2, Save, ArrowLeft, FileText, X, Upload } from 'lucide-react';
+import { Sparkles, Loader2, FileText, X, Upload } from 'lucide-react';
 import { generatePEIContent } from '../services/geminiService';
-import { PEIContent, PEIData } from '../types';
+import { PEIData } from '../types';
 
 interface PEIFormProps {
-  onSave: (data: PEIData) => Promise<void>;
-  onCancel: () => void;
+  onGenerated: (data: PEIData) => void;
 }
 
-const PEIForm: React.FC<PEIFormProps> = ({ onSave, onCancel }) => {
+const PEIForm: React.FC<PEIFormProps> = ({ onGenerated }) => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [pdfBase64, setPdfBase64] = useState<string | null>(null);
@@ -27,8 +26,6 @@ const PEIForm: React.FC<PEIFormProps> = ({ onSave, onCancel }) => {
     extraContext: ''
   });
   
-  const [generatedContent, setGeneratedContent] = useState<PEIContent | null>(null);
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -63,20 +60,9 @@ const PEIForm: React.FC<PEIFormProps> = ({ onSave, onCancel }) => {
         ...formData,
         pdfBase64: pdfBase64 || undefined
       });
-      setGeneratedContent(content);
-    } catch (error) {
-      console.error('Erro ao gerar PEI:', error);
-      alert('Houve um erro ao gerar o PEI. Verifique sua conexão ou tente novamente.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleFinalSave = async () => {
-    if (!generatedContent) return;
-    setLoading(true);
-    try {
-      await onSave({
+      
+      // Monta o objeto final e envia para o componente pai exibir
+      const finalData: PEIData = {
         student_name: formData.studentName,
         class_name: formData.className,
         subject: formData.subject,
@@ -85,63 +71,25 @@ const PEIForm: React.FC<PEIFormProps> = ({ onSave, onCancel }) => {
         teacher_regent: formData.teacher,
         collaboration_team: formData.team,
         execution_period: formData.executionPeriod,
-        content: generatedContent
-      });
+        content: content
+      };
+
+      onGenerated(finalData);
+
     } catch (error) {
-      console.error('Erro ao salvar:', error);
-      alert('Erro ao salvar o PEI no banco de dados.');
+      console.error('Erro ao gerar PEI:', error);
+      alert('Houve um erro ao gerar o PEI. Verifique sua conexão ou tente novamente.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (generatedContent) {
-    return (
-      <div className="max-w-4xl mx-auto p-4 animate-in fade-in duration-500">
-        <div className="flex justify-between items-center mb-6">
-          <button onClick={() => setGeneratedContent(null)} className="flex items-center gap-2 text-slate-500 hover:text-indigo-600 transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Voltar à Edição
-          </button>
-          <button 
-            onClick={handleFinalSave}
-            disabled={loading}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-medium shadow-lg shadow-green-200 transition-all disabled:opacity-50"
-          >
-            {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Salvar PEI Finalizado
-          </button>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          <div className="bg-indigo-600 px-8 py-6 text-white">
-            <h2 className="text-2xl font-bold">PEI Gerado: {formData.studentName}</h2>
-            <p className="text-indigo-100 opacity-90 mt-1">{formData.subject} - {formData.className}</p>
-          </div>
-          
-          <div className="p-8 space-y-8">
-            <PEISection title="1⁰ - Histórico Clínico e Familiar" content={generatedContent.historicoClinico} />
-            <PEISection title="2⁰ - Condição Específica" content={generatedContent.condicaoEspecifica} />
-            <PEISection title="3⁰ - Conhecimentos, Habilidades e Afinidades" content={generatedContent.habilidadesAfinidades} />
-            <PEISection title="4⁰ - Principais Barreiras" content={generatedContent.barreiras} />
-            <PEISection title="5⁰ - Habilidades da Turma (BNCC/DCT)" content={generatedContent.habilidadesBNCC} />
-            <PEISection title="6⁰ - Adaptação e Flexibilização de Habilidades" content={generatedContent.habilidadesAdaptadas} />
-            <PEISection title="7⁰ - Objeto do Conhecimento (BNCC/DCT)" content={generatedContent.objetoConhecimentoBNCC} />
-            <PEISection title="8⁰ - Adaptação do Objeto do Conhecimento" content={generatedContent.objetoConhecimentoAdaptado} />
-            <PEISection title="9⁰ - Objetivos do PEI" content={generatedContent.objetivosPEI} />
-            <PEISection title="10⁰ - Metodologias (Recursos e Estratégias)" content={generatedContent.metodologias} />
-            <PEISection title="11⁰ - Avaliação e Retomada" content={generatedContent.avaliacao} />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-4xl mx-auto p-4">
+    <div className="max-w-4xl mx-auto p-4 animate-in fade-in duration-500">
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
         <div className="bg-indigo-600 px-8 py-6 text-white">
           <h2 className="text-2xl font-bold">Criar Novo PEI</h2>
-          <p className="text-indigo-100 opacity-90">Preencha os dados e anexe o laudo para que a IA gere o plano pedagógico.</p>
+          <p className="text-indigo-100 opacity-90">Preencha os dados e anexe o laudo para gerar o documento pronto para impressão.</p>
         </div>
 
         <form onSubmit={handleGenerate} className="p-8 space-y-6">
@@ -202,28 +150,21 @@ const PEIForm: React.FC<PEIFormProps> = ({ onSave, onCancel }) => {
             />
           </div>
 
-          <div className="flex justify-end gap-4 pt-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-6 py-3 text-slate-600 font-medium hover:text-slate-800 transition-colors"
-            >
-              Cancelar
-            </button>
+          <div className="flex justify-end pt-4">
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] disabled:opacity-70"
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg shadow-indigo-200 transition-all active:scale-[0.98] disabled:opacity-70 w-full md:w-auto justify-center"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Gerando PEI...
+                  Gerando Documento...
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Gerar PEI com IA
+                  Gerar PEI Agora
                 </>
               )}
             </button>
@@ -253,15 +194,6 @@ const FormField: React.FC<{
       required={required}
       className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all outline-none"
     />
-  </div>
-);
-
-const PEISection: React.FC<{ title: string; content: string }> = ({ title, content }) => (
-  <div className="group">
-    <h3 className="text-lg font-bold text-slate-800 mb-3 group-hover:text-indigo-600 transition-colors">{title}</h3>
-    <div className="text-slate-600 leading-relaxed whitespace-pre-line p-4 bg-slate-50 rounded-xl border border-slate-100">
-      {content}
-    </div>
   </div>
 );
 
